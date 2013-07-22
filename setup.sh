@@ -33,14 +33,17 @@ mkdir $HOME/nginx-data
 mkdir $HOME/nginx-images
 cp exercise-webpage/index.html $HOME/nginx-data/
 
-cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.old
+sudo chown $USER:$USER /etc/nginx/sites-enabled/default
 
 echo $"server {
       listen 8080;
         location / {
-                root /data/www;
+                root $HOME/nginx-data/;
         }
         location /images/ {
-                root /data;
+                root $HOME/nginx-images/;
         }
         }" >> /etc/nginx/sites-enabled/default
+
+nginx -s reload
+sudo service nginx restart
