@@ -1,14 +1,38 @@
 #!/bin/bash
-# Simple setup.sh for configuring Ubuntu 12.04 LTS EC2 instance
-# for headless setup. 
 
-# Install nvm: node-version manager
-# https://github.com/creationix/nvm
-#sudo -s
+    if [ "$(which nginx)" == "" ] ; then
+	if grep nginx /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+	    sudo apt-get install nginx
+	else
+	    sudo add-apt-repository -y ppa:nginx/stable
+	    if grep nginx /etc/apt/sources.list.d/*; then
+		sudo apt-get update
+		sudo apt-get install -y nginx 
+	    else
+		echo "PPA failed to be added"
+	    fi
+	fi
+    else
+        echo "Nginx is installed"
+    fi
 
-sudo add-apt-repository ppa:nginx/$nginx
-sudo apt-get update
-sudo apt-get install -y nginx
+    if [ "$(which git)" == "" ] ; then
+	sudo apt-get install -y git-core
+    fi
+	
+    DIRECTORY=$(pwd) 
+    DIRECTORY+='/exercise-webpage'
 
-git clone https://github.com/puppetlabs/exercise-webpage
-cd exercise-webpage/
+    if [ -d "$DIRECTORY" ]; then
+	echo "Already downloaded"
+    else
+	git clone https://github.com/puppetlabs/exercise-webpage
+    fi
+
+    mkdir $HOME/nginx-data
+    mkdir $HOME/nginx-images
+    cp exercise-webpage/index.html $HOME/nginx-data/
+
+    cp /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default.old
+    
+
