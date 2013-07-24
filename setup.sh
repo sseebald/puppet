@@ -15,6 +15,8 @@ NGINX_Dir="$(pwd)/nginx"
 # Create our web directories for our site
     if [ -d $NGINX_Dir ]; then
         read -p "Directory $NGINX_Dir already exists - Please specify another directory: " NGINX_Dir
+        NGINX_Dir="$(pwd)/$NGINX_Dir"
+        mkdir $NGINX_Dir
     else
         mkdir $NGINX_Dir
     fi
@@ -38,7 +40,7 @@ NGINX_Dir="$(pwd)/nginx"
         echo "Directory already exists" >> $NGINX_Dir/logs/log.txt
     else
         mkdir $NGINX_Dir/nginx-images
-        echo "Creating directory: $NGINX_Dir/nginx-images ... Success" >> $NGINX_Dir/logs/log.tx
+        echo "Creating directory: $NGINX_Dir/nginx-images ... Success" >> $NGINX_Dir/logs/log.txt
     fi
 
 # OS Check - Looking specifically for Ubuntu, RHEL, SuSE
@@ -51,22 +53,19 @@ is_RHEL=0
 for STRING in 'Ubuntu' 'SuSE' 'Red Hat' 'CentOS' 'Fedora'
 do
     if  grep -q "$STRING" /etc/*-release; then
-	if [ "$STRING" == "Ubuntu" ]; then
-	    is_Ubuntu=1
-	    echo "Ubuntu/Debian install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
-	    break
-	elif [ "$STRING" == "SuSE" ]; then
+        if [ "$STRING" == "Ubuntu" ]; then
+            is_Ubuntu=1
+            echo "Ubuntu/Debian install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
+            break
+        elif [ "$STRING" == "SuSE" ]; then
             is_SuSE=1
-	    echo "SuSE install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
-	    break
-	else
-	    is_RHEL=1
-	    echo "Red Hat/Fedora/CentOS install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
-	    break
-	fi
-    else
-	echo "OS unsupported" >> $NGINX_Dir/logs/log.txt
-	exit
+            echo "SuSE install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
+            break
+        else
+            is_RHEL=1
+            echo "Red Hat/Fedora/CentOS install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
+            break
+        fi
     fi
 done
 
@@ -129,7 +128,7 @@ if [ $is_Ubuntu == "1" ]; then
     
     # To avoid causing any irrepairable damage to an already existing configuration (and because it's best 
     # practice), back up the current default configuration  
-    cp /etc/nginx/sites-enabled/default $NGINX_Dir-data/default.old
+    cp /etc/nginx/sites-enabled/default $NGINX_Dir/nginx-data/default.old
     echo "Default nginx server configuration backed up successfully to $NGINX_Dir/nginx-data.old" >> $NGINX_Dir/logs/log.txt
 
     # Append our own server group to set the port and data directories to the end of the file
@@ -149,8 +148,8 @@ if [ $is_Ubuntu == "1" ]; then
     
     # Once we've add our site configuration, reload the nginx configuration file, and restart the service 
     
-    nginx -s reload
-    sudo service nginx restart
+    sudo service nginx stop
+    sudo service nginx start
 
     echo "All components successfully installed. Index.html is currently being hosted over port 8080"
 fi
