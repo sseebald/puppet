@@ -4,11 +4,9 @@
 # Author: Spencer Seebald 
 # Supported OS's - Ubuntu (finished), RHEL (Unfinished), CentOS (Unfinished), SuSE (Unfinished)
 # Overall TO-DOs:
-#    -Add OS check
 #    -Code for differences in different OS's
-#    -Add more echo before and after each step so the user knows what is going on, 
-#     what's being installed, and where we are in the install process 
 #    -Complete TO-DOs listed in the code below
+#    -Error handling?
 
 NGINX_Dir="$(pwd)/nginx"
 
@@ -44,7 +42,6 @@ NGINX_Dir="$(pwd)/nginx"
     fi
 
 # OS Check - Looking specifically for Ubuntu, RHEL, SuSE
-
 is_Ubuntu=0
 is_SuSE=0
 is_RHEL=0
@@ -72,11 +69,10 @@ done
 # Check to see if nginx is already installed. If it's not installed, 
 # add the nginx/stable PPA to the respository, update our sources, 
 # and install the newest stable build   
-
 if [ $is_Ubuntu == "1" ]; then
     if [ "$(which nginx)" == "" ] ; then
-	if grep nginx /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-	    sudo apt-get install-y -q nginx
+	if grep -q nginx /etc/apt/sources.list /etc/apt/sources.list.d/*; then
+	    sudo apt-get install -y -q nginx
 	    if [ "$(which nginx)" != "" ] ; then
 		echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
 	    else
@@ -85,6 +81,7 @@ if [ $is_Ubuntu == "1" ]; then
 	else
 	    #TO-DO: Find build - Older builds might need a different PPA
 	    sudo add-apt-repository -y ppa:nginx/stable
+	    echo "Adding nginx/stable repository ... Success" >> $NGINX_Dir/logs/log.tx
 	    if grep nginx /etc/apt/sources.list.d/*; then
 		sudo apt-get update -q
 		sudo apt-get install -y -q nginx 
@@ -98,19 +95,15 @@ if [ $is_Ubuntu == "1" ]; then
     fi
 
     # Check to see if Git is installed. We need this to pull down the index.html from the Puppet repository
-    
     if [ "$(which git)" == "" ] ; then
 	sudo apt-get install -y git-core
 	echo "Installing git-core ... Success" >> $NGINX_Dir/logs/log.txt
     fi
     
     # Set our current working directory
-    
-    DIRECTORY=$(pwd) 
-    DIRECTORY+='/exercise-webpage'
+    DIRECTORY="$(pwd)/exercise-webpage"
     
     # Check to make sure the git directory and file doesnt already exist. If they do not, pull down the index.html
-    
     if [ -d "$DIRECTORY" ]; then
 	echo "Already downloaded" >> $NGINX_Dir/logs/log.txt
     else
