@@ -50,7 +50,7 @@ is_RHEL=0
 for STRING in 'Ubuntu' 'SuSE' 'Red Hat' 'CentOS' 'Fedora'
 do
     if  grep -q "$STRING" /etc/*-release; then
-        if [ "$STRING" == "Ubuntu" ]; then
+        if [ "$STRING" == "Ubuntu" || "$STRING" == "Debian" ]; then
             is_Ubuntu=1
             echo "Ubuntu/Debian install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
             break
@@ -70,19 +70,25 @@ done
 # add the nginx/stable PPA to the respository, update our sources, 
 # and install the newest stable build   
 if [ $is_Ubuntu == "1" ]; then
-    if [ "$(which nginx)" == "" ] ; then
+    if [ "$(which nginx)" == "" ]; then
 	if grep -q nginx /etc/apt/sources.list /etc/apt/sources.list.d/*; then
 	    sudo apt-get install -y -q nginx
-	    if [ "$(which nginx)" != "" ] ; then
+	    if [ "$(which nginx)" != "" ]; then
 		echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
 	    else
 		echo "There was an error installing nginx" >> $NGINX_Dir/logs/log.txt
 	    fi
 	else
-	    #TO-DO: Find build - Older builds might need a different PPA
-	    sudo add-apt-repository -y ppa:nginx/stable
-	    echo "Adding nginx/stable repository ... Success" >> $NGINX_Dir/logs/log.tx
-	    if grep nginx /etc/apt/sources.list.d/*; then
+	    VAR=$(grep "DISTRIB_RELEASE" /etc/*-release)
+	    if [ ${VAR:(-5)} > 10.1 ]; then
+		#TO-DO: Find build - Older builds might need a different PPA
+		sudo add-apt-repository -y ppa:nginx/stable
+		echo "Adding nginx/stable repository ... Success" >> $NGINX_Dir/logs/log.tx
+	    else
+		echo "deb http://ppa.launchpad.net/nginx/$nginx/ubuntu lucid main" > /etc/apt/sources.list.d/nginx-$nginx-lucid.list
+		apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C
+	    fi
+	    if grep -q nginx /etc/apt/sources.list.d/* /etc/apt/sources.list; then
 		sudo apt-get update -q
 		sudo apt-get install -y -q nginx 
 		echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
@@ -146,4 +152,11 @@ if [ $is_Ubuntu == "1" ]; then
 
     echo "All components successfully installed. Index.html is currently being hosted over port 8080"
 fi
-   
+
+if [ $is_SuSE == "1" ]; then
+
+fi
+
+if [ $is_RHEL == "1" ]; then
+
+fi
