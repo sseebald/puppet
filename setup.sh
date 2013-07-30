@@ -49,11 +49,11 @@ is_RHEL=0
 for STRING in 'Ubuntu' 'Red Hat' 'CentOS' 'Fedora' 'Debian'
 do
     if grep -q "$STRING" /etc/*-release; then
-        if [ "$STRING" == "Ubuntu" || "$STRING" == "Debian" ]; then
+        if [ "$STRING" == "Ubuntu" ] || [ "$STRING" == "Debian" ]; then
             is_Ubuntu=1
             echo "Ubuntu/Debian install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
             break
-        elif [ "$STRING" == "Fedora" || "$STRING" == "Red Hat" || "$STRING" == "CentOS" ]; then
+        elif [ "$STRING" == "Fedora" ] || [ "$STRING" == "Red Hat" ] || [ "$STRING" == "CentOS" ]; then
             is_RHEL=1
             echo "Red Hat/Fedora/CentOS install detected, beginning installation" >> $NGINX_Dir/logs/log.txt
             break
@@ -81,7 +81,7 @@ if [ $is_Ubuntu -eq 1 ]; then
 		STATUS=$?
             else
 		VAR=$(grep "DISTRIB_RELEASE" /etc/*-release)
-		if [ ${VAR:(-5)} > 10.1 ]; then
+		if [ ${VAR:(-5)} -ge 10.1 ]; then
 		    sudo add-apt-repository -y ppa:nginx/stable
 		    echo "Adding nginx/stable repository ... Success" >> $NGINX_Dir/logs/log.tx
 		else
@@ -91,22 +91,35 @@ if [ $is_Ubuntu -eq 1 ]; then
 		if grep -q nginx /etc/apt/sources.list.d/* /etc/apt/sources.list; then
 		    sudo apt-get update -q
 		    sudo apt-get install -y -q nginx 
-		    echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
+		    STATUS=$?
+		    if [ $STATUS == 0 ]; then
+			echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
+			STATUS="2"
+		    fi
 		else
 		    echo "PPA failed to be added" >> $NGINX_Dir/logs/log.txt
 		fi    
-		# Check to see if Git is installed. We need this to pull down the index.html from the Puppet repository
-		if hash git 2>/dev/null; then
-		    sudo apt-get install -y git-core
-		    echo "Installing git-core ... Success" >> $NGINX_Dir/logs/log.txt
-		fi
-		if [ $STATUS -eq 1 && $X < 2]; then
+		if [ $STATUS -eq 1 && $X -le 2]; then
 		    # Try to install again, just in case.
-		    STATUS=0
+		    STATUS="0"
 		else
 		    echo "Install failed!"
 		    exit
 		fi
+	    fi
+	fi
+	# Check to see if Git is installed. We need this to pull down the index.html from the Puppet repository
+	if hash git 2>/dev/null; then
+	    echo "Git Installed"
+	    STATUS="2"
+	else 
+	    sudo apt-get install -y git-core
+	    STATUS=$?
+	    if [ $STATUS==0 ]; then
+		echo "Installing git-core ... Success" >> $NGINX_Dir/logs/log.txt
+		STATUS="2"
+	    else
+		echo "Install failed!"
 	    fi
 	fi
     done
@@ -193,7 +206,7 @@ if [ $is_RHEL -eq 1 ]; then
 		echo "Installing git-core ... Success" >> $NGINX_Dir/logs/log.txt
 	fi
 	    
-            if [ $STATUS -eq 1 && $X < 2]; then
+            if [ $STATUS -eq 1 ] && [ $X -le 2]; then
 		# Try to install again, just in case.
 		STATUS=0
             else
