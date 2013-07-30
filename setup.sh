@@ -41,7 +41,7 @@ NGINX_Dir="$(pwd)/nginx"
         echo "Creating directory: $NGINX_Dir/nginx-images ... Success" >> $NGINX_Dir/logs/log.txt
     fi
 
-# OS Check - Looking specifically for Ubuntu, RHEL, SuSE
+# OS Check - Looking specifically for Ubuntu, RHEL flavor OS's
 is_Ubuntu=0
 is_RHEL=0
 
@@ -92,7 +92,7 @@ if [ $is_Ubuntu -eq 1 ]; then
 		    sudo apt-get update -q
 		    sudo apt-get install -y -q nginx 
 		    STATUS=$?
-		    if [ $STATUS == 0 ]; then
+		    if [ $STATUS -eq 0 ]; then
 			echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
 			STATUS="2"
 		    fi
