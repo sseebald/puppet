@@ -152,8 +152,11 @@ if [ $is_Ubuntu -eq 1 ]; then
     
     # TO-DO: Add a check on the defualt config file and make sure no other sites are configured on port 8080. 
     # Also, run a netstat to see if any services are hosted on 8080 already. Pass this to the user if there is.  
-    
-    echo $"server {
+
+    if grep 8080 /etc/nginx/sites-enabled/default; then
+	echo "There is already a site configured to use port 8080. Reconfigure this site and re-run the installer to save yourself from the wrath of cthulu"
+    else
+	echo $"server {
       listen 8080;
         location / {
                 root $NGINX_Dir/nginx-data/;
@@ -162,7 +165,7 @@ if [ $is_Ubuntu -eq 1 ]; then
                 root $NGINX_Dir/nginx-images/;
         }
         }" >> /etc/nginx/sites-enabled/default
-    
+    fi
     # Once we've add our site configuration, reload the nginx configuration file, and restart the service 
     
     sudo service nginx stop
