@@ -151,7 +151,7 @@ if [ "$is_Ubuntu" -eq 1 ]; then
     # TO-DO: Add a check on the defualt config file and make sure no other sites are configured on port 8080. 
     # Also, run a netstat to see if any services are hosted on 8080 already. Pass this to the user if there is.  
 
-    if [ grep "listen 8080" /etc/nginx/sites-enabled/default ] || [ netstat -tulpn | grep 8080 ]; then
+    if [ grep "listen 8080" /etc/nginx/sites-enabled/default > /dev/null] || [ netstat -tulpn | grep 8080 > /dev/null ]; then
 	echo "There is already a site configured to use port 8080. Reconfigure this site and re-run the installer to save yourself from the wrath of cthulu"
     else
 	echo $"server {
