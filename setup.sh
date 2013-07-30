@@ -80,12 +80,13 @@ if [ $is_Ubuntu -eq "1" ]; then
 		sudo apt-get install -y -q nginx
 		STATUS=$?
             else
-		VAR=$(grep "DISTRIB_RELEASE" /etc/*-release)
-		if [ ${VAR:(-5)} -ge "10.1" ]; then
+		RELEASESERVER="$(lsb_release -r)"
+                RELEASESERVER=${RELEASESERVER:(-3):1}
+		if [ $RELEASESERVER -ge "10.1" ]; then
 		    sudo add-apt-repository -y ppa:nginx/stable
 		    echo "Adding nginx/stable repository ... Success" >> $NGINX_Dir/logs/log.tx
 		else
-		    echo "deb http://ppa.launchpad.net/nginx/$nginx/ubuntu lucid main" > /etc/apt/sources.list.d/nginx-$nginx-lucid.list
+		    echo "deb http://ppa.launchpad.net/nginx/$nginx/ubuntu lucid main" > /etc/apt/sources.list.d/nginx-stable-lucid.list
 		    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C
 		fi
 		if grep -q nginx /etc/apt/sources.list.d/* /etc/apt/sources.list; then
@@ -99,7 +100,7 @@ if [ $is_Ubuntu -eq "1" ]; then
 		else
 		    echo "PPA failed to be added" >> $NGINX_Dir/logs/log.txt
 		fi    
-		if [ $STATUS -eq "1" && $X -le "2"]; then
+		if [ $STATUS -eq "1" ] && [ $X -le "2"]; then
 		    # Try to install again, just in case.
 		    STATUS="0"
 		else
