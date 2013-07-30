@@ -77,7 +77,7 @@ if [ "$is_Ubuntu" -eq 1 ]; then
             STATUS="2"
 	else
             if grep -q /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-		sudo apt-get install -y -q nginx
+		sudo apt-get install -yq nginx
 		STATUS=$?
             else
 		RELEASESERVER="$(lsb_release -r)"
@@ -89,9 +89,9 @@ if [ "$is_Ubuntu" -eq 1 ]; then
 		    echo "deb http://ppa.launchpad.net/nginx/$nginx/ubuntu lucid main" > /etc/apt/sources.list.d/nginx-stable-lucid.list
 		    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C300EE8C
 		fi
-		if grep -q -s nginx /etc/apt/sources.list.d/* /etc/apt/sources.list; then
+		if grep -qs nginx /etc/apt/sources.list.d/* /etc/apt/sources.list; then
 		    sudo apt-get update -q
-		    sudo apt-get install -y -q nginx 
+		    sudo apt-get install -yq nginx 
 		    STATUS=$?
 		    if [ "$STATUS" -eq 0 ]; then
 			echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
@@ -151,7 +151,7 @@ if [ "$is_Ubuntu" -eq 1 ]; then
     # TO-DO: Add a check on the defualt config file and make sure no other sites are configured on port 8080. 
     # Also, run a netstat to see if any services are hosted on 8080 already. Pass this to the user if there is.  
 
-    if [ grep -q -s "listen 8080" /etc/nginx/sites-enabled/default ] || [ netstat -tulpn | grep -q -s 8080 > /dev/null ]; then
+    if grep -qs "listen 8080" /etc/nginx/sites-enabled/default || netstat -tulpn | grep -qs 8080; then
 	echo "There is already a site configured to use port 8080. Reconfigure this site and re-run the installer to save yourself from the wrath of cthulu"
     else
 	echo $"server {
@@ -172,4 +172,6 @@ if [ "$is_Ubuntu" -eq 1 ]; then
 
     else
 	echo "Program not installed, check the logs for clues"
+    fi
 fi
+    
