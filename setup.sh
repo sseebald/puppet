@@ -67,10 +67,10 @@ done
 # Check to see if nginx is already installed. If it's not installed, 
 # add the nginx/stable PPA to the respository, update our sources, 
 # and install the newest stable build   
-if [ "$is_Ubuntu" -eq "1" ]; then
+if [ "$is_Ubuntu" -eq 1 ]; then
     STATUS=0
     
-    while [ "$STATUS" -eq "0" ]
+    while [ "$STATUS" -eq 0 ]
     do
 	if hash nginx 2>/dev/null; then
             echo "NGINX already installed."
@@ -81,8 +81,8 @@ if [ "$is_Ubuntu" -eq "1" ]; then
 		STATUS=$?
             else
 		RELEASESERVER="$(lsb_release -r)"
-                RELEASESERVER=${RELEASESERVER:(-3):1}
-		if [ "$RELEASESERVER" -ge "10.1" ]; then
+                RELEASESERVER=${RELEASESERVER:(-5):2}
+		if [ "$RELEASESERVER" -ge 10 ] &&  [ "$RELEASESERVER" -le 11 ] ; then
 		    sudo add-apt-repository -y ppa:nginx/stable
 		    echo "Adding nginx/stable repository ... Success" >> $NGINX_Dir/logs/log.tx
 		else
@@ -93,14 +93,14 @@ if [ "$is_Ubuntu" -eq "1" ]; then
 		    sudo apt-get update -q
 		    sudo apt-get install -y -q nginx 
 		    STATUS=$?
-		    if [ "$STATUS" -eq "0" ]; then
+		    if [ "$STATUS" -eq 0 ]; then
 			echo "Installing nginx ... Success" >> $NGINX_Dir/logs/log.txt
 			STATUS="2"
 		    fi
 		else
 		    echo "PPA failed to be added" >> $NGINX_Dir/logs/log.txt
 		fi    
-		if [ "$STATUS" -eq "1" ] && [ $X -le "2"]; then
+		if [ "$STATUS" -eq 1 ] && [ $X -le 2]; then
 		    # Try to install again, just in case.
 		    STATUS="0"
 		else
@@ -116,7 +116,7 @@ if [ "$is_Ubuntu" -eq "1" ]; then
 	else 
 	    sudo apt-get install -y git-core
 	    STATUS=$?
-	    if [ $STATUS == "0" ]; then
+	    if [ $STATUS -eq 0 ]; then
 		echo "Installing git-core ... Success" >> $NGINX_Dir/logs/log.txt
 		STATUS="2"
 	    else
@@ -175,10 +175,10 @@ if [ "$is_Ubuntu" -eq "1" ]; then
     echo "All components successfully installed. Index.html is currently being hosted over port 8080"
 fi
 
-if [ $is_RHEL -eq "1" ]; then
+if [ $is_RHEL -eq 1 ]; then
     STATUS=0
     
-    while [ $STATUS -eq "0" ]
+    while [ $STATUS -eq 0 ]
     do
 	if hash nginx 2>/dev/null; then
             echo "NGINX already installed."
