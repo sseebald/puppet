@@ -145,7 +145,7 @@ if [ "$is_Ubuntu" -eq 1 ]; then
 
     # Append our own server group to set the port and data directories to the end of the file, but first make sure that there are no currently running programs bound to 8080 
     if grep -qs "listen 8080" /etc/nginx/sites-enabled/default || netstat -tulpn | grep -qs 8080; then
-	echo "There is already a site configured to use port 8080. Reconfigure this site and re-run the installer to save yourself from the wrath of cthulu"
+	echo "There is already a site configured to use port 8080. Reconfigure this site and re-run the installer"
     else
 	echo $"server {
       listen 8080;
