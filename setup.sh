@@ -2,11 +2,9 @@
 
 # This script will install an Nginx webserver and host a file, index.html over port 8080
 # Author: Spencer Seebald 
-# Supported OS's - Ubuntu [Debian], CentOS [RHEL]
-# Overall TO-DOs:
-#    -Code for differences in different OS's
-#    -Complete TO-DOs listed in the code below
-#    -Error handling?
+# Supported OS's - Ubuntu [Debian]
+# Usage: chmod u+x setup.sh
+#        ./setup.sh   
 
 NGINX_Dir="$(pwd)/nginx"
 
@@ -45,9 +43,8 @@ NGINX_Dir="$(pwd)/nginx"
         echo "Creating directory: $NGINX_Dir/nginx-images ... Success" >> $NGINX_Dir/logs/log.txt
     fi
 
-# OS Check - Looking specifically for Ubuntu, RHEL flavor OS's
+# OS Check - Looking specifically for Ubuntu/Debian
 is_Ubuntu=0
-is_RHEL=0
 
 # Loop to determine OS type - To add more supported OS's, add new OS to for line and add logic for it
 for STRING in 'Ubuntu' 'Debian'
@@ -146,11 +143,7 @@ if [ "$is_Ubuntu" -eq 1 ]; then
     cp /etc/nginx/sites-enabled/default $NGINX_Dir/nginx-data/default.old
     echo "Default nginx server configuration backed up successfully to $NGINX_Dir/nginx-data/default.old" >> $NGINX_Dir/logs/log.txt
 
-    # Append our own server group to set the port and data directories to the end of the file
-    
-    # TO-DO: Add a check on the defualt config file and make sure no other sites are configured on port 8080. 
-    # Also, run a netstat to see if any services are hosted on 8080 already. Pass this to the user if there is.  
-
+    # Append our own server group to set the port and data directories to the end of the file, but first make sure that there are no currently running programs bound to 8080 
     if grep -qs "listen 8080" /etc/nginx/sites-enabled/default || netstat -tulpn | grep -qs 8080; then
 	echo "There is already a site configured to use port 8080. Reconfigure this site and re-run the installer to save yourself from the wrath of cthulu"
     else
@@ -169,9 +162,7 @@ if [ "$is_Ubuntu" -eq 1 ]; then
 	sudo service nginx stop
 	sudo service nginx start
 	echo "All components successfully installed. Index.html is currently being hosted over port 8080"
-
     else
 	echo "Program not installed, check the logs for clues"
     fi
 fi
-    
